@@ -1,0 +1,9 @@
+praw 
+pandas 
+python-dotenv
+numpy
+nltk
+scikit-learn
+joblib
+requests
+beautifulsoup4
