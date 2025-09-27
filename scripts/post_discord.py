@@ -5,15 +5,16 @@ post_discord.py
 Fetches top 5 positive and top 5 negative comments from the SQLite DB
 and posts them to a Discord channel via webhook.
 
-Author: Muhammad Adam Khan
 """
 
 import os
 import sqlite3
 import requests
 import pandas as pd
+from dotenv import load_dotenv
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1421217656572346450/dzyqg6alAhHEbuan2TLVJ_AVvyWMua2wxA-CcS0bxj4-k1uCRpm-s8cRS8EiG5riz34h"
+load_dotenv()
+WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 DB_PATH = os.path.join("data", "comments.db")
 

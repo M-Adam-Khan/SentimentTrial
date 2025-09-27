@@ -1,7 +1,23 @@
+#!/usr/bin/env python3
+"""
+save_db.py
+==========
+
+Save processed Reddit comments into a SQLite database.
+
+- Reads preprocessed comments from data/processed_comments.csv.
+- Creates a SQLite database (comments.db) if it doesn't exist.
+- Creates a 'comments' table with appropriate columns.
+- Inserts comment data safely using parameterized queries to avoid SQL injection.
+- Commits changes and closes the database connection.
+
+"""
+
 import os
 import sqlite3
 import pandas as pd
 
+#Defining the Paths
 CSV_PATH = os.path.join("data", "processed_comments.csv")
 DB_PATH = os.path.join("data", "comments.db")
 
@@ -13,7 +29,7 @@ def save_to_db():
     df = pd.read_csv(CSV_PATH)
 
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    cursor = conn.cursor() #cursor used for sql queries
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS comments (
@@ -36,7 +52,7 @@ def save_to_db():
             INSERT INTO comments (
                 post_id, comment_id, parent_id, username, text, preprocessed_text,
                 sentiment, score, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) #safe way to avoid sql injections
         """, (
             row.get("post_id"),
             row.get("comment_id"),

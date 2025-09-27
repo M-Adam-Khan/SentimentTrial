@@ -15,7 +15,7 @@ DATA_PATH = os.path.join("data", "processed_comments.csv")
 MODEL_PATH = os.path.join("models", "sentiment_model.pkl")
 VECTORIZER_PATH = os.path.join("models", "tfidf_vectorizer.pkl")
 
-
+#Data loading func.
 def load_data():
     if not os.path.exists(DATA_PATH):
         raise FileNotFoundError(f"Processed data not found at {DATA_PATH}. Run preprocess.py first.")
@@ -26,7 +26,7 @@ def load_data():
     
     return df
 
-
+#Training model func.
 def train_model():
     print("Loading processed data...")
     df = load_data()
@@ -43,15 +43,15 @@ def train_model():
     vectorizer = TfidfVectorizer(
         lowercase=True,
         strip_accents="unicode",
-        max_features=5000,
-        ngram_range=(1, 2)
+        max_features=5000, #To reduce complexity and save time
+        ngram_range=(1, 2) #decides to pick single or pairs
     )
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_test_tfidf = vectorizer.transform(X_test)
 
     print("Training Logistic Regression model...")
     model = LogisticRegression(
-        max_iter=300,
+        max_iter=300, #maximum number of attempts for the model to learn properly.
         class_weight="balanced",
         random_state=42
     )

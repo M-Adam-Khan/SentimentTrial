@@ -1,3 +1,21 @@
+"""
+run_all.py
+==========
+
+Orchestrates the full SentimentTrial pipeline end-to-end.
+
+Workflow:
+1. Scrapes Reddit comments from a given post URL.
+2. Preprocesses and cleans the scraped comments.
+3. Trains a sentiment analysis model using Logistic Regression and TF-IDF features.
+4. Saves the processed comments to an SQLite database.
+5. Queries the database to display top positive/negative comments and sentiment distribution.
+6. Posts the top comments to a Discord channel via webhook.
+
+Each step is executed sequentially using the corresponding script in the 'scripts/' folder.
+
+"""
+
 import os
 import subprocess
 import sqlite3

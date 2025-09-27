@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 preprocess.py
--------------
+
 Step 2 of the SentimentTrial pipeline.
 
 - Reads raw Reddit comments from data/raw_comments.csv
@@ -9,7 +9,6 @@ Step 2 of the SentimentTrial pipeline.
 - Generates sentiment labels using VADER
 - Saves processed output to data/processed_comments.csv
 
-Author: Muhammad Adam Khan
 """
 
 import os
@@ -34,6 +33,7 @@ stop_words = set(stopwords.words("english"))
 sia = SentimentIntensityAnalyzer()
 
 
+#Defining the cleaning Patterns.
 URL_PATTERN = re.compile(r"http\S+|www\.\S+")
 MARKDOWN_LINK_PATTERN = re.compile(r'\[([^\]]+)\]\((http[s]?:\/\/[^\)]+)\)')
 MARKDOWN_IMAGE_PATTERN = re.compile(r'!\[.*?\]\(.*?\)')
@@ -46,21 +46,21 @@ def clean_text(text: str, remove_stopwords=True) -> str:
     if pd.isna(text):
         return ""
 
-    text = html.unescape(str(text))
+    text = html.unescape(str(text)) #convert html entities to normal text.
 
-    text = MARKDOWN_LINK_PATTERN.sub(r"\1", text)
-    text = MARKDOWN_IMAGE_PATTERN.sub("", text)
+    text = MARKDOWN_LINK_PATTERN.sub(r"\1", text) #remove markdown links
+    text = MARKDOWN_IMAGE_PATTERN.sub("", text) #remove markdown image references
 
-    text = URL_PATTERN.sub("", text)
+    text = URL_PATTERN.sub("", text) #remove urls
 
-    text = USER_SUB_RE.sub("", text)
+    text = USER_SUB_RE.sub("", text) #remove further references e.g r/subreddit.
 
-    text = HTML_TAG_RE.sub("", text)
+    text = HTML_TAG_RE.sub("", text) #remove HTML tags
 
-    if BOT_PATTERN.search(text):
+    if BOT_PATTERN.search(text): #check bot comments
         text = re.sub(BOT_PATTERN, "", text)
 
-    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip() #Normalize Witespaces
 
     text = text.lower()
 
@@ -84,7 +84,7 @@ def clean_text(text: str, remove_stopwords=True) -> str:
     return " ".join(cleaned_tokens)
 
 
-def vader_label(text: str) -> str:
+def vader_label(text: str) -> str: #basic type-hinting (input,output = string)
     if not text or str(text).strip() == "":
         return "neutral"
     score = sia.polarity_scores(text)["compound"]
@@ -112,6 +112,7 @@ def preprocess(input_csv="data/raw_comments.csv",
     print("Running VADER sentiment analysis...")
     df["rule_label"] = df["text"].apply(vader_label)
 
+#Handling empty / dropped rows
     before = len(df)
     df = df[df["preprocessed_text"].str.strip() != ""]
     after = len(df)

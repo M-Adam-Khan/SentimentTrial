@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+"""
+query_db.py
+=================
+
+Fetch and display Reddit comments stored in the SQLite database.
+
+- Connects to the comments.db SQLite database.
+- Executes custom SQL queries to fetch comments.
+- Displays top positive, negative comments and overall sentiment distribution.
+- Uses pandas to handle SQL query results as DataFrames.
+
+"""
+
 import os
 import sqlite3
 import pandas as pd

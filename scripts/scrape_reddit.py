@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scrape_reddit.py
-================
+
 Scrape Reddit comments from a given post URL using PRAW.
 
 - Uses script-based login with CLIENT_ID, CLIENT_SECRET, USERNAME, PASSWORD, USER_AGENT.
@@ -9,7 +9,8 @@ Scrape Reddit comments from a given post URL using PRAW.
 - Handles errors, rate-limits, and retries gracefully.
 - Saves results into data/raw_comments.csv
 
-Author: Muhammad Adam Khan
+Faster version: fetches only top-level comments and limits deep threads to speed up scraping.
+Prints live progress logs for better monitoring.
 """
 
 import os
@@ -24,13 +25,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Assigning credentials from the environment
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 USERNAME = os.getenv("REDDIT_USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 USER_AGENT = os.getenv("USER_AGENT")
 
-
+# Connecting to Reddit API
 try:
     reddit = praw.Reddit(
         client_id=CLIENT_ID,
@@ -48,18 +50,23 @@ def scrape_post_comments(post_url: str, max_comments: int = 150) -> pd.DataFrame
     """
     Scrape comments from a Reddit post URL.
     Returns a DataFrame with: comment_id, post_id, username, text, score, created_at.
+    Uses only top-level comments and limits deep threads to speed up scraping.
+    Prints live logs for every 10 comments processed.
     """
     comments_data = []
     try:
         submission = reddit.submission(url=post_url)
         submission.comment_sort = "top"
-        submission.comments.replace_more(limit=None)
-        all_comments = submission.comments.list()
+
+        # Fetch only top-level comments and skip deep threads
+        submission.comments.replace_more(limit=0)
+        all_comments = submission.comments.list()[:max_comments]
+
     except (RequestException, ResponseException, PrawcoreException) as e:
         print(f"Error fetching submission: {e}")
         return pd.DataFrame()
 
-    print(f"Found {len(all_comments)} total comments. Collecting up to {max_comments}...")
+    print(f"Found {len(all_comments)} comments. Collecting up to {max_comments}...")
 
     for i, comment in enumerate(all_comments, 1):
         try:
@@ -73,28 +80,20 @@ def scrape_post_comments(post_url: str, max_comments: int = 150) -> pd.DataFrame
                 "created_at": datetime.fromtimestamp(comment.created_utc).isoformat()
             })
 
+            # Log progress every 10 comments
+            if i % 10 == 0 or i == len(all_comments):
+                print(f"Processed {i}/{len(all_comments)} comments.")
+
+            # Sleep every 20 comments to avoid hitting rate limits
             if i % 20 == 0:
+                print("Sleeping 1 second to avoid hitting rate limits...")
                 time.sleep(1)
 
-            if i >= max_comments:
-                break
-
         except Exception as e:
-            error_msg = str(e).lower()
-            if "rate limit" in error_msg:
-                wait_time = 60
-                secs = re.findall(r'(\d+) seconds', error_msg)
-                if secs:
-                    wait_time = int(secs[0]) + 5
-                print(f"Rate limit hit. Sleeping for {wait_time} seconds...")
-                time.sleep(wait_time)
-                continue
-            else:
-                print(f"Skipping comment #{i} due to error: {e}")
-                continue
+            print(f"Skipping comment #{i} due to error: {e}")
+            continue
 
     return pd.DataFrame(comments_data)
-
 
 def main():
     os.makedirs("data", exist_ok=True)
@@ -109,8 +108,8 @@ def main():
     output_path = "data/raw_comments.csv"
     df.to_csv(output_path, index=False)
     print(f"Scraped {len(df)} comments. Saved to {output_path}")
+    print("Sample of scraped data:")
     print(df.head())
-
 
 if __name__ == "__main__":
     main()
