@@ -80,11 +80,11 @@ def scrape_post_comments(post_url: str, max_comments: int = 150) -> pd.DataFrame
                 "created_at": datetime.fromtimestamp(comment.created_utc).isoformat()
             })
 
-            # Log progress every 10 comments
+            #showing logs after 10 comments
             if i % 10 == 0 or i == len(all_comments):
                 print(f"Processed {i}/{len(all_comments)} comments.")
 
-            # Sleep every 20 comments to avoid hitting rate limits
+            #sleep added after every 20 comments
             if i % 20 == 0:
                 print("Sleeping 1 second to avoid hitting rate limits...")
                 time.sleep(1)
