@@ -37,13 +37,14 @@ Install dependencies:
 pip install -r requirements.txt
 
 
-Create a .env file in the root directory with your Reddit credentials:
+Create a .env file in the root directory with your Reddit credentials and Discord Webhook Link:
 
 CLIENT_ID=your_reddit_client_id
 CLIENT_SECRET=your_reddit_client_secret
 REDDIT_USERNAME=your_reddit_username
 PASSWORD=your_reddit_password
 USER_AGENT=your_user_agent
+DISCORD_WEBHOOK_URL =your_webhook_link
 
 Usage
 
