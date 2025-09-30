@@ -45,7 +45,7 @@ def format_message(df, sentiment_label):
     suitable for Discord.
     """
     message = f"**Top {len(df)} {sentiment_label} comments:**\n"
-    for idx, row in df.iterrows():
+    for _, row in df.iterrows():
         username = row['username']
         text = row['text']
         score = row['score']

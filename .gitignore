@@ -8,6 +8,7 @@ __pycache__/
 # Virtual environment
 venv/
 env/
+temp_auto_push.bat
 
 # Data & models
 data/
@@ -18,3 +19,5 @@ models/
 
 # Environment files
 .env
+.gitignore
+temp_interactive_push.bat

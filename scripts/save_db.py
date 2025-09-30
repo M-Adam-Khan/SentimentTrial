@@ -17,7 +17,7 @@ import os
 import sqlite3
 import pandas as pd
 
-#Defining the Paths
+# Defining the Paths
 CSV_PATH = os.path.join("data", "processed_comments.csv")
 DB_PATH = os.path.join("data", "comments.db")
 
@@ -29,13 +29,13 @@ def save_to_db():
     df = pd.read_csv(CSV_PATH)
 
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor() #cursor used for sql queries
+    cursor = conn.cursor()  # cursor used for SQL queries
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             post_id TEXT,
-            comment_id TEXT,
+            comment_id TEXT UNIQUE,
             parent_id TEXT,
             username TEXT,
             text TEXT,
@@ -49,10 +49,10 @@ def save_to_db():
     print("Inserting data into database...")
     for _, row in df.iterrows():
         cursor.execute("""
-            INSERT INTO comments (
+            INSERT OR IGNORE INTO comments (
                 post_id, comment_id, parent_id, username, text, preprocessed_text,
                 sentiment, score, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) #safe way to avoid sql injections
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             row.get("post_id"),
             row.get("comment_id"),
@@ -60,7 +60,7 @@ def save_to_db():
             row.get("username"),
             row.get("text"),
             row.get("preprocessed_text"),
-            row.get("rule_label"),  
+            row.get("rule_label"),
             row.get("score"),
             row.get("created_at")
         ))
@@ -68,6 +68,7 @@ def save_to_db():
     conn.commit()
     conn.close()
     print(f"Data successfully saved to {DB_PATH}")
+
 
 if __name__ == "__main__":
     save_to_db()
